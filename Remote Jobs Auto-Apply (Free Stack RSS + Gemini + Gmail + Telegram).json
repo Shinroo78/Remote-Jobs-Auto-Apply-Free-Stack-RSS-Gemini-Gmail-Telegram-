@@ -1,0 +1,908 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6defb408-0fee-5dd6-8996-75b786bced87",
+              "name": "minScore",
+              "value": 90,
+              "type": "number"
+            },
+            {
+              "id": "d4f70ffa-9128-5c6e-9048-46b9c8bded46",
+              "name": "maxAgeDays",
+              "value": 7,
+              "type": "number"
+            },
+            {
+              "id": "6cf90b90-f456-50b5-90c9-b2538e0e7657",
+              "name": "maxJobsToEvaluate",
+              "value": 12,
+              "type": "number"
+            },
+            {
+              "id": "8aad3c90-56bf-503d-b3d4-0455c7f5f247",
+              "name": "maxApplicationsPerRun",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "fd79cf3c-aca6-5929-b757-47ea6b32d830",
+              "name": "dryRun",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "5b55eaf7-bd23-5f52-9f78-b0245cb294f1",
+              "name": "targetRegions",
+              "value": "Algeria, Europe (EU/UK/EEA), USA, Canada, Worldwide/Anywhere",
+              "type": "string"
+            },
+            {
+              "id": "f1770ae7-2d7e-5d2e-a268-2909ef511cb1",
+              "name": "telegramChatId",
+              "value": "YOUR_TELEGRAM_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "d1eb8945-0310-542f-8d8f-c7e169a8a9ad",
+              "name": "candidateName",
+              "value": "YOUR FULL NAME",
+              "type": "string"
+            },
+            {
+              "id": "a3062d33-963b-5071-b3bf-42972eb64a14",
+              "name": "candidateEmail",
+              "value": "your.email@gmail.com",
+              "type": "string"
+            },
+            {
+              "id": "f1fbcf03-8cec-5b55-8ec6-d548ffb5c677",
+              "name": "candidatePhone",
+              "value": "+213 000 00 00 00",
+              "type": "string"
+            },
+            {
+              "id": "6917da5e-c303-585a-b4b9-80fe897d6d2c",
+              "name": "candidateLinkedIn",
+              "value": "https://www.linkedin.com/in/your-profile",
+              "type": "string"
+            },
+            {
+              "id": "2a756f93-6b42-58f0-a9ac-c897464a254c",
+              "name": "cvLink",
+              "value": "https://drive.google.com/your-public-cv-link",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "5485ef8b-9db9-4384-b688-a699433f1d22",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cv = String($json.cvText || '').trim();\nif (cv.length < 200) {\n  throw new Error('لا توجد سيرة ذاتية محفوظة. افتح نموذج الرفع (عقدة CV Upload Form) وارفع ملف PDF أو PNG أولاً.');\n}\nreturn [{ json: { cvText: cv } }];"
+      },
+      "id": "78401c74-3772-4d1e-a80a-74640e8a53e2",
+      "name": "CV Source",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://remoteok.com/remote-jobs.rss",
+        "options": {}
+      },
+      "id": "1546b621-8145-4919-bf67-cf454b803b20",
+      "name": "RemoteOK RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        160
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://weworkremotely.com/remote-jobs.rss",
+        "options": {}
+      },
+      "id": "6e5f2e3b-7326-4a29-b722-06e172ebd672",
+      "name": "WWR RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        352
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://remotive.com/remote-jobs/feed",
+        "options": {}
+      },
+      "id": "fcf63ed4-92b8-4733-b4c4-fc91e5715da3",
+      "name": "Remotive RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        800,
+        544
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "a48f14aa-2dd5-49eb-a0ae-3670858a593d",
+      "name": "Merge Feeds",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1072,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst store = $getWorkflowStaticData('global');\nstore.seen = store.seen || {};\nconst now = Date.now();\n// prune seen-links older than 30 days\nfor (const k of Object.keys(store.seen)) { if (now - store.seen[k] > 30 * 86400000) delete store.seen[k]; }\n\nconst strip = h => String(h || '')\n  .replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\\s+/g, ' ').trim();\nconst EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g;\nconst BAD_EMAIL = /(no-?reply|donotreply|example\\.png|sentry|wixpress)/i;\n\nconst maxAge = Number(cfg.maxAgeDays || 7) * 86400000;\nconst dup = new Set();\nconst jobs = [];\n\nfor (const it of $input.all()) {\n  const j = it.json || {};\n  if (j.error || !j.title || !j.link) continue;\n  const link = String(j.link).trim();\n  if (dup.has(link)) continue;\n  dup.add(link);\n  const sample = j.__sample === true;\n  if (!sample && store.seen[link]) continue;\n\n  const rawContent = String(j['content:encoded'] || j.content || j.description || j.contentSnippet || '');\n  const description = strip(rawContent).slice(0, 6000);\n  const ts = Date.parse(j.isoDate || j.pubDate || '') || now;\n  if (!sample && now - ts > maxAge) continue;\n\n  const text = (j.title + ' ' + description).toLowerCase();\n  // hard drop: on-site / hybrid roles that never mention remote\n  if (/\\b(on-?site|in-?office|hybrid)\\b/.test(text) && !/remote|work from home|anywhere/.test(text)) continue;\n\n  const emails = ((rawContent + ' ' + description).match(EMAIL) || []).filter(e => !BAD_EMAIL.test(e));\n  let host = '';\n  try { host = new URL(link).hostname.replace(/^www\\./, ''); } catch (e) {}\n\n  jobs.push({ json: {\n    title: strip(j.title),\n    company: strip(j.creator || j.author || j['dc:creator'] || ''),\n    link, source: host,\n    pubDate: new Date(ts).toISOString(),\n    categories: Array.isArray(j.categories) ? j.categories : [],\n    description,\n    emailFound: emails[0] || '',\n    _ts: ts\n  }});\n}\n\njobs.sort((a, b) => b.json._ts - a.json._ts);\nreturn jobs.slice(0, Number(cfg.maxJobsToEvaluate || 12));"
+      },
+      "id": "f4af7779-6c0c-4912-a1b2-a52aa20400b8",
+      "name": "Normalize and Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst cv = String($('CV Source').first().json.cvText || '').slice(0, 12000);\n\nconst system = `You are a strict, evidence-based technical recruiter and ATS screening engine.\nCompare the candidate CV with the job posting and return ONLY a JSON object.\n\nSCORING RULES\n- match_score (0-100): based ONLY on evidence in the CV versus the job's stated requirements. Be conservative.\n  90+ is allowed only if ALL core required skills, the domain and the seniority level clearly match. Deduct heavily for each missing core requirement. Never assume skills the CV does not state.\n- job_quality_score (0-100): clarity of the posting, seriousness of the employer, realistic requirements, compensation transparency, technical depth.\n- is_remote: true ONLY if the job is explicitly fully remote. On-site or hybrid => false.\n- location_ok: true ONLY if the job is open to worldwide/anywhere candidates, OR explicitly open to at least one of the target regions given by the user (Algeria, Europe/EU/UK, USA, Canada). false if restricted to other regions (e.g. India only, APAC only, LATAM only) or if it demands residence outside the target regions.\n- contact_email: an application email address that literally appears in the posting text, else \"\". Never invent one.\n\nOUTPUT JSON SCHEMA (no markdown, no extra text):\n{\"match_score\": integer, \"job_quality_score\": integer, \"is_remote\": boolean, \"location_ok\": boolean, \"contact_email\": string, \"hard_requirements_missing\": [string], \"strengths\": [string], \"reasoning\": string, \"summary_ar\": string}\nsummary_ar is a 1-2 sentence summary of the job written in Arabic.`;\n\nreturn $input.all().map(it => {\n  const j = it.json;\n  const user = `CANDIDATE CV:\\n\"\"\"\\n${cv}\\n\"\"\"\\n\\nTARGET REGIONS: ${cfg.targetRegions}\\nMINIMUM ACCEPTABLE MATCH: ${cfg.minScore}\\n\\nJOB POSTING\\nTitle: ${j.title}\\nCompany/Author: ${j.company}\\nSource: ${j.source}\\nPublished: ${j.pubDate}\\nURL: ${j.link}\\nCategories: ${(j.categories || []).join(', ')}\\nEmail found in text: ${j.emailFound || 'none'}\\nDescription:\\n\"\"\"\\n${j.description}\\n\"\"\"\\n\\nReturn ONLY the JSON object.`;\n  return { json: { ...j, geminiBody: {\n    systemInstruction: { parts: [{ text: system }] },\n    contents: [{ role: 'user', parts: [{ text: user }] }],\n    generationConfig: { temperature: 0.1, maxOutputTokens: 4096, responseMimeType: 'application/json' }\n  }}};\n});"
+      },
+      "id": "1a744313-04dd-4ab1-bed1-f9fdfbf56d33",
+      "name": "Build Eval Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiBody) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 7000
+            }
+          },
+          "timeout": 90000
+        }
+      },
+      "id": "1692316f-3116-403b-9aba-092bfc6b0320",
+      "name": "Gemini Evaluate Match",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1840,
+        352
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PqutKl4DGeWIgHJB",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "formTitle": "ارفع سيرتك الذاتية",
+        "formDescription": "ارفع ملف CV بصيغة PDF أو PNG. سيقرأه الذكاء الاصطناعي ويحفظ نصه ثم يبدأ البحث والتقديم.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "CV",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf,.png,.jpg,.jpeg",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cfd48729-34d4-4e70-adbe-d4a341d3df17",
+      "name": "CV Upload Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -768,
+        672
+      ],
+      "webhookId": "3c02d7ff-9d40-5cf9-bc90-80e860c53a78"
+    },
+    {
+      "parameters": {
+        "jsCode": "const bin = $input.first().binary || {};\nconst key = Object.keys(bin)[0];\nif (!key) throw new Error('لم يصل أي ملف. ارفع CV بصيغة PDF أو PNG.');\nconst meta = bin[key];\nconst name = String(meta.fileName || '').toLowerCase();\nlet mime = meta.mimeType || '';\nif (!mime) mime = name.endsWith('.pdf') ? 'application/pdf' : name.endsWith('.png') ? 'image/png' : 'image/jpeg';\nif (!['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(mime)) {\n  throw new Error('صيغة غير مدعومة (' + mime + '). ارفع PDF أو PNG.');\n}\nconst buf = await this.helpers.getBinaryDataBuffer(0, key);\nconst data = buf.toString('base64');\nreturn [{ json: { geminiBody: {\n  contents: [{ role: 'user', parts: [\n    { inlineData: { mimeType: mime, data } },\n    { text: 'Transcribe this CV/resume completely into clean plain text. Keep every detail exactly as written (name, contacts, skills, experience, education, languages, projects, dates). Do not summarize, translate, or add anything. Output plain text only, no markdown.' }\n  ]}],\n  generationConfig: { temperature: 0, maxOutputTokens: 8192 }\n}}}];"
+      },
+      "id": "f8a10583-f65e-4a9f-a8db-2d28796d2a2b",
+      "name": "Prepare CV Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiBody) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 7000
+            }
+          },
+          "timeout": 90000
+        }
+      },
+      "id": "c9bb4c2e-3b21-435d-a3b5-aa9929d4685d",
+      "name": "Gemini Read CV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        672
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PqutKl4DGeWIgHJB",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json || {};\nif (r.error) {\n  const e = r.error;\n  const msg = typeof e === 'string' ? e : (e.message || JSON.stringify(e));\n  throw new Error('فشل Gemini في قراءة الـ CV: ' + String(msg).slice(0, 400));\n}\nconst parts = (r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || [];\nconst text = parts.map(p => p.text || '').join('').trim();\nif (text.length < 200) {\n  throw new Error('تعذّر استخراج نص كافٍ من الملف (finishReason: ' + ((r.candidates && r.candidates[0] && r.candidates[0].finishReason) || 'n/a') + '). جرّب ملفاً أوضح.');\n}\n// Saved for the scheduled runs (persists when the workflow is Active).\n$getWorkflowStaticData('global').cvText = text;\nreturn [{ json: { cvText: text } }];"
+      },
+      "id": "10251ce9-5e14-4292-9710-27b1e947fbdd",
+      "name": "Extract CV Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst jobs = $('Build Eval Prompt').all();\nconst store = $getWorkflowStaticData('global');\nstore.seen = store.seen || {};\nconst EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$/;\nconst maxAgeDays = Number(cfg.maxAgeDays || 7);\nconst now = Date.now();\nconst qualified = [];\nlet failed = 0, lastErr = '';\n\n$input.all().forEach((r, i) => {\n  const idx = (r.pairedItem && r.pairedItem.item !== undefined) ? r.pairedItem.item : i;\n  const src = jobs[idx];\n  if (!src) return;\n  const { geminiBody, _ts, ...job } = src.json;\n\n  let ev = null;\n  try {\n    const t = (r.json && r.json.candidates && r.json.candidates[0] && r.json.candidates[0].content\n      ? r.json.candidates[0].content.parts.map(p => p.text || '').join('') : '');\n    ev = JSON.parse(t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim());\n  } catch (e) { ev = null; }\n  if (!ev) { // AI failed: do not mark as seen, it will be retried next run\n    failed++;\n    const e = r.json && r.json.error;\n    lastErr = e ? (typeof e === 'string' ? e : (e.message || JSON.stringify(e)))\n      : (r.json && r.json.promptFeedback ? 'blocked: ' + JSON.stringify(r.json.promptFeedback) : 'empty/invalid AI response');\n    return;\n  }\n\n  store.seen[job.link] = now;\n\n  const match = Number(ev.match_score) || 0;\n  const quality = Number(ev.job_quality_score) || 0;\n  if (!(match >= Number(cfg.minScore || 90) && ev.is_remote === true && ev.location_ok === true)) return;\n\n  const ageDays = Math.max(0, (now - Date.parse(job.pubDate)) / 86400000);\n  const recency = Math.max(0, 100 - ageDays * (100 / maxAgeDays));\n  const finalScore = Math.round((match * 0.6 + quality * 0.25 + recency * 0.15) * 10) / 10;\n\n  let contactEmail = '';\n  if (ev.contact_email && EMAIL.test(String(ev.contact_email).trim()) && job.description.includes(String(ev.contact_email).trim())) {\n    contactEmail = String(ev.contact_email).trim();\n  } else if (job.emailFound && EMAIL.test(job.emailFound)) {\n    contactEmail = job.emailFound;\n  }\n\n  qualified.push({ json: {\n    ...job, matchScore: match, qualityScore: quality, finalScore, contactEmail,\n    strengths: ev.strengths || [], missing: ev.hard_requirements_missing || [],\n    reasoning: ev.reasoning || '', summaryAr: ev.summary_ar || ''\n  }});\n});\n\nif (failed > 0 && failed === $input.all().length) {\n  throw new Error('فشلت كل طلبات Gemini (' + failed + '): ' + String(lastErr).slice(0, 500));\n}\nqualified.sort((a, b) => b.json.finalScore - a.json.finalScore);\nreturn qualified.slice(0, Number(cfg.maxApplicationsPerRun || 3));"
+      },
+      "id": "414f0d54-4233-48a6-b878-18aa1f6485e7",
+      "name": "Parse and Select Best",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cv = String($('CV Source').first().json.cvText || '').slice(0, 12000);\nconst cfg = $('Config').first().json;\n\nconst system = `You write job-application cover letters for the candidate whose CV is provided.\nRULES\n- Use ONLY facts that appear in the CV. Never invent employers, degrees, numbers, certifications or tools.\n- Tone: refined, courteous, rigorous and confident. Show competence through concrete, relevant evidence; no flattery, no filler, no clichés.\n- Length: 170-230 words. Plain text only: no markdown, no placeholders, no square brackets.\n- Structure: greeting; one-sentence purpose; two short paragraphs mapping the candidate's strongest evidence to the job's key requirements; a brief closing proposing a call; polite sign-off with the candidate's name.\n- State that the candidate is available for fully remote work.\n- Write in the language of the job posting (English if unclear).\n- Return ONLY a JSON object: {\"subject\": string, \"body\": string}. The subject must be short and professional and include the job title.`;\n\nreturn $input.all().map(it => {\n  const j = it.json;\n  const user = `CANDIDATE NAME: ${cfg.candidateName}\\n\\nCANDIDATE CV:\\n\"\"\"\\n${cv}\\n\"\"\"\\n\\nJOB\\nTitle: ${j.title}\\nCompany: ${j.company || 'the hiring team'}\\nURL: ${j.link}\\nMatching strengths identified: ${(j.strengths || []).join('; ')}\\nDescription:\\n\"\"\"\\n${j.description}\\n\"\"\"\\n\\nReturn ONLY the JSON object.`;\n  return { json: { ...j, geminiBody: {\n    systemInstruction: { parts: [{ text: system }] },\n    contents: [{ role: 'user', parts: [{ text: user }] }],\n    generationConfig: { temperature: 0.4, maxOutputTokens: 4096, responseMimeType: 'application/json' }\n  }}};\n});"
+      },
+      "id": "7b84711e-ce1a-433b-a4cb-545b971f2bcb",
+      "name": "Build Letter Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2368,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiBody) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 7000
+            }
+          },
+          "timeout": 90000
+        }
+      },
+      "id": "b6441d2c-54c5-4964-acac-3ed85b988dd9",
+      "name": "Gemini Write Cover Letter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2624,
+        352
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PqutKl4DGeWIgHJB",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst src = $('Build Letter Prompt').all();\nconst out = [];\n\n$input.all().forEach((r, i) => {\n  const idx = (r.pairedItem && r.pairedItem.item !== undefined) ? r.pairedItem.item : i;\n  const s = src[idx];\n  if (!s) return;\n  const { geminiBody, ...job } = s.json;\n\n  let letter = null;\n  try {\n    const t = (r.json && r.json.candidates && r.json.candidates[0] && r.json.candidates[0].content\n      ? r.json.candidates[0].content.parts.map(p => p.text || '').join('') : '');\n    letter = JSON.parse(t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim());\n  } catch (e) { letter = null; }\n\n  const body = letter && letter.body ? String(letter.body).trim() : '';\n  const subject = (letter && letter.subject) ? String(letter.subject).trim()\n    : `Application - ${job.title} - ${cfg.candidateName}`;\n\n  const signature = [\n    '', '--',\n    cfg.candidateName,\n    [cfg.candidateEmail, cfg.candidatePhone].filter(Boolean).join(' | '),\n    cfg.candidateLinkedIn ? 'LinkedIn: ' + cfg.candidateLinkedIn : '',\n    cfg.cvLink ? 'CV: ' + cfg.cvLink : ''\n  ].filter(x => x !== '').join('\\n');\n\n  const emailBody = body ? body + '\\n' + signature : '';\n  const dry = cfg.dryRun === true || cfg.dryRun === 'true';\n  const emailReady = !!job.contactEmail && !!body && !dry;\n\n  let manualReason = '';\n  if (!job.contactEmail) manualReason = 'لا يوجد بريد إلكتروني للجهة في الإعلان — قدّم يدوياً عبر الرابط';\n  else if (!body) manualReason = 'تعذّر توليد رسالة التقديم';\n  else if (dry) manualReason = 'وضع التجربة (dryRun) مفعّل — لم يُرسل أي بريد';\n\n  out.push({ json: { ...job, subject, emailBody, emailReady, manualReason } });\n});\nreturn out;"
+      },
+      "id": "9f460e05-8d93-4322-9c06-fd06d194b176",
+      "name": "Prepare Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "aeebd9e9-735e-50f4-a0f2-f9ab04a9befa",
+              "leftValue": "={{ $json.emailReady }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9d3f68cf-3f5d-44e6-ad82-8fa33b55f712",
+      "name": "Can Send Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3152,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.contactEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "={{ $('Config').first().json.candidateName }}"
+        }
+      },
+      "id": "ae997627-182c-487e-a60b-5290fedbf0c8",
+      "name": "Gmail Send Application",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3408,
+        272
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "webhookId": "1874bedc-a7e6-4d90-861e-f4bd97404deb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "sMytHlHGC07Dekh9",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $('Prepare Email').item.json;\nconst gm = $json || {};\nconst esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst cut = (s, n) => { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };\n\nlet status;\nif (d.emailReady) {\n  status = (gm.id && !gm.error) ? '✅ تم إرسال التقديم عبر Gmail' : '❌ فشل إرسال البريد — قدّم يدوياً';\n} else {\n  status = '📝 تقديم يدوي مطلوب: ' + d.manualReason;\n}\n\nconst lines = [\n  status, '',\n  '💼 <b>' + esc(cut(d.title, 160)) + '</b>',\n  d.company ? '🏢 ' + esc(cut(d.company, 80)) : '',\n  '🌐 المصدر: ' + esc(d.source),\n  '🎯 نسبة التوافق: <b>' + d.matchScore + '%</b> | الجودة: ' + d.qualityScore + ' | التقييم النهائي: ' + d.finalScore,\n  '🔗 ' + esc(d.link),\n  d.contactEmail ? '📧 ' + esc(d.contactEmail) : '📧 لا يوجد بريد',\n  '', '📝 ' + esc(cut(d.summaryAr, 500)),\n  (d.strengths && d.strengths.length) ? '✔️ نقاط القوة: ' + esc(cut(d.strengths.join('، '), 350)) : '',\n  (d.missing && d.missing.length) ? '⚠️ نواقص: ' + esc(cut(d.missing.join('، '), 250)) : ''\n].filter(x => x !== '');\n\nif (d.emailBody) {\n  lines.push('', '✉️ <b>الموضوع:</b> ' + esc(cut(d.subject, 150)), '<pre>' + esc(cut(d.emailBody, 1800)) + '</pre>');\n}\nreturn { json: { telegramText: lines.join('\\n').slice(0, 4000) } };"
+      },
+      "id": "c38f3671-4445-4f3f-aed7-075367aabc80",
+      "name": "Format Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3664,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Config').first().json.telegramChatId }}",
+        "text": "={{ $json.telegramText }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "594d1879-8832-4291-8d32-3567eb33b1f2",
+      "name": "Telegram Notify",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3920,
+        352
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 4000,
+      "webhookId": "2d21c962-89d1-45eb-b836-6047c23e906a",
+      "credentials": {
+        "telegramApi": {
+          "id": "h3wlaTM2UVmzRRYn",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "0d16ee57-e130-4822-9d48-b4ccbba85e2e",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $json || {};\nconst err = (e.execution && e.execution.error) || {};\nconst esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst text = [\n  '🚨 <b>فشل في Workflow التقديم الآلي</b>',\n  'Workflow: ' + esc(e.workflow && e.workflow.name),\n  'العقدة: ' + esc(err.node && err.node.name),\n  'الرسالة: ' + esc(String(err.message || 'unknown').slice(0, 600)),\n  e.execution && e.execution.url ? 'التنفيذ: ' + esc(e.execution.url) : ''\n].filter(Boolean).join('\\n');\nreturn { json: { text } };"
+      },
+      "id": "05bd9306-6694-41de-987c-cb209a923210",
+      "name": "Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "8cb5a517-78d8-414a-a6f2-87049e12ecef",
+      "name": "Telegram Error Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        928
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 4000,
+      "webhookId": "4db88f6b-423e-441e-affe-705ae27424f7",
+      "credentials": {
+        "telegramApi": {
+          "id": "h3wlaTM2UVmzRRYn",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ الإعداد\n1. عدّل عقدتي **Config** و **CV Source** (الاسم، البريد، chat id، نص الـ CV).\n2. اربط Credentials: Gemini API Key (Header Auth) / Gmail OAuth2 / Telegram Bot.\n3. افتح **CV Upload Form** وارفع سيرتك (PDF أو PNG) — تُقرأ وتُحفظ تلقائياً.\n   عقد **CV Source** وRSS الثلاث عليها pinData للتجربة — اضغط Unpin قبل التشغيل الفعلي.\n4. dryRun=true افتراضياً (لا يرسل بريداً). غيّره إلى false بعد التجربة.\n5. Settings ← Error workflow ← اختر هذا الـ workflow نفسه.",
+        "height": 190,
+        "width": 560
+      },
+      "id": "03d1d43e-c5a6-47c0-96cd-c53ad9645f73",
+      "name": "Note Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 الذكاء الاصطناعي (مجاني)\nGemini 2.5 Flash عبر HTTP Request. الطلبات بمعدل طلب كل 7 ثوانٍ لاحترام حدود الطبقة المجانية.",
+        "height": 120,
+        "width": 560
+      },
+      "id": "b3294437-2ba5-4f60-9464-fb8c2760bab9",
+      "name": "Note AI",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "CV Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CV Source": {
+      "main": [
+        [
+          {
+            "node": "RemoteOK RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WWR RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Remotive RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RemoteOK RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WWR RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Remotive RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Feeds": {
+      "main": [
+        [
+          {
+            "node": "Normalize and Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize and Filter": {
+      "main": [
+        [
+          {
+            "node": "Build Eval Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Eval Prompt": {
+      "main": [
+        [
+          {
+            "node": "Gemini Evaluate Match",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Evaluate Match": {
+      "main": [
+        [
+          {
+            "node": "Parse and Select Best",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CV Upload Form": {
+      "main": [
+        [
+          {
+            "node": "Prepare CV Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare CV Request": {
+      "main": [
+        [
+          {
+            "node": "Gemini Read CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Read CV": {
+      "main": [
+        [
+          {
+            "node": "Extract CV Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract CV Text": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse and Select Best": {
+      "main": [
+        [
+          {
+            "node": "Build Letter Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Letter Prompt": {
+      "main": [
+        [
+          {
+            "node": "Gemini Write Cover Letter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Write Cover Letter": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email": {
+      "main": [
+        [
+          {
+            "node": "Can Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Can Send Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail Send Application",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Send Application": {
+      "main": [
+        [
+          {
+            "node": "Format Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Telegram": {
+      "main": [
+        [
+          {
+            "node": "Telegram Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error": {
+      "main": [
+        [
+          {
+            "node": "Telegram Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "CV Source": [
+      {
+        "cvText": "YOUR FULL NAME - Polymer Engineer | Automation & AI | Embedded Production\nLocation: Algeria (fully remote, open to Europe / USA / Canada teams)\n\nSUMMARY\nPolymer engineer with hands-on experience in extrusion and injection-moulding process control,\nindustrial automation (PLC, SCADA, sensors), embedded production systems and applied AI/ML\n(Python, scikit-learn, LLM-based automation, n8n workflows).\n\nSKILLS\nPolymer processing & materials characterisation; process optimisation; quality control (SPC)\nPLC programming (Siemens/Schneider), industrial IoT, SCADA, Arduino/ESP32 embedded firmware\nPython, JavaScript, REST APIs, data analysis, machine learning, computer vision for defect detection\nLLM prompt engineering, workflow automation (n8n, Make), Docker, Linux, Git\n\nEXPERIENCE\n- Automation of a polymer extrusion line: sensor integration, PLC logic, predictive-quality ML model.\n- Embedded production monitoring system (ESP32 + MQTT + dashboard) for a manufacturing workshop.\n- Built AI-assisted automation pipelines (LLM + APIs) to cut manual reporting time.\n\nEDUCATION\nMaster's degree in Polymer Engineering.\n\nLANGUAGES\nArabic (native), French (fluent), English (professional)"
+      }
+    ],
+    "RemoteOK RSS": [
+      {
+        "__sample": true,
+        "title": "Senior Automation & AI Engineer - Polymer Manufacturing (Remote, Worldwide)",
+        "link": "https://example.com/jobs/automation-ai-polymer-001",
+        "creator": "PolyTech Systems",
+        "isoDate": "2026-10-17T09:00:00.000Z",
+        "categories": [
+          "automation",
+          "ai",
+          "engineering"
+        ],
+        "content": "<p>PolyTech Systems is hiring a fully remote Automation &amp; AI Engineer, open to candidates worldwide (Europe, North America, MENA welcome). You will automate extrusion and injection-moulding lines: PLC/SCADA integration, sensor data pipelines, embedded monitoring (ESP32/MQTT), and ML models for predictive quality in Python. Requirements: polymer processing knowledge, industrial automation, Python, machine learning, LLM-based workflow automation is a plus, English proficiency. Apply by email: careers@polytech-systems.example.com</p>"
+      }
+    ],
+    "WWR RSS": [
+      {
+        "__sample": true,
+        "title": "Process Engineer (On-site, Houston TX)",
+        "link": "https://example.com/jobs/onsite-process-engineer-002",
+        "creator": "Gulf Plastics",
+        "isoDate": "2026-10-17T11:00:00.000Z",
+        "categories": [
+          "engineering"
+        ],
+        "content": "<p>On-site role in Houston. Must work from our plant 5 days a week. Hybrid not available.</p>"
+      }
+    ],
+    "Remotive RSS": [
+      {
+        "__sample": true,
+        "title": "Frontend React Developer (Remote, EU)",
+        "link": "https://example.com/jobs/react-dev-003",
+        "creator": "WebStudio",
+        "isoDate": "2026-10-16T15:00:00.000Z",
+        "categories": [
+          "software-dev"
+        ],
+        "content": "<p>Remote frontend developer in Europe. React, TypeScript, Next.js, CSS. Apply via the website form only.</p>"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d6f1b64544f17e655a3f87406dc9f7af17268495f059cbf9e4c4f39b195b9672"
+  }
+}
